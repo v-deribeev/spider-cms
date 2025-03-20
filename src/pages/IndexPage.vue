@@ -11,8 +11,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-// import axios from 'axios'
-import mockData from '../../mockData.json'
+// import mockData from '../../mockData.json'
+import { api } from 'src/boot/axios.js'
 import TeamTable from 'src/components/MatchTable.vue'
 
 const matchData = reactive({})
@@ -23,18 +23,9 @@ const fetchData = async () => {
   isError.value = false
   try {
     loading.value = true
-    // const response = await axios.get(
-    //   'https://soccer-football-info.p.rapidapi.com/matches/view/basic/',
-    //   {
-    //     params: { i: '90a218c1eac4c020', l: 'en_US' },
-    //     headers: {
-    //       'x-rapidapi-host': 'soccer-football-info.p.rapidapi.com',
-    //       'x-rapidapi-key': 'b08c6ec553msh91d8ee6d892e190p1672dejsn15abb8832a12',
-    //     },
-    //   },
-    // )
-    // Object.assign(matchData, response.data)
-    Object.assign(matchData, mockData)
+    const response = await api.get('/matches/view/basic/')
+    Object.assign(matchData, response.data)
+    // Object.assign(matchData, mockData)
     console.log('test2', matchData?.result?.[0])
   } catch (err) {
     console.error('Error fetching data:', err)
