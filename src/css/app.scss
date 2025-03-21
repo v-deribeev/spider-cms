@@ -2,3 +2,21 @@
 body {
   color: $color--font--borders;
 }
+.main-yellow {
+  color: $color-yellow;
+}
+.main-red {
+  color: $color-red;
+}
+.bg-main-yellow {
+  background-color: $color-yellow;
+}
+.bg-main-red {
+  background-color: $color-red;
+}
+.bg-home {
+  background-color: $bg--hometeam--table;
+}
+.bg-away {
+  background-color: $bg--awayteam--table;
+}

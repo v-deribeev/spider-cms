@@ -1,10 +1,22 @@
+# TO DO:
+
+1. add localization via vue-i18n
+2. add tests
+3. discuss addition of a reset button to table in case a card has been added by mistake
+4. a11y improvements like color contrast
+
 # spider-cms
 
 App for representing data for two football teams
 
-# spider-app (spider-cms-quasar)
+# spider-cms
 
-A Quasar Project
+App has been deployed on Netlify and can be tinkered with locally and after merge it would be automatically redeployed on Netlify
+can be found @ https://spider-cms.netlify.app/#/
+
+Mock data is available in [IndexPage.vue] by commenting out
+**// import mockData from '../../mockData.json'**
+**// Object.assign(matchData, mockData.result)**
 
 ## Install the dependencies
 
@@ -19,6 +31,16 @@ npm install
 ```bash
 quasar dev
 ```
+
+#### Reusable Components:
+
+MatchTable.vue - handles data rendering of matches incl. player pos, name, shirt-number, card tracking, stadium and referee name
+CustomLabels.vue - used to handle text in the app, use cases include <a>, <p>, <span> and more
+CustomHeadings.vue - used to handle headings with custom typography and styling
+CustomButton.vue - used to handle buttons in various styles
+
+quasar.variables.scss - here you can add necessary CSS variables
+app.scss - adding global classes or styling elements globally.
 
 ### Lint the files
 
