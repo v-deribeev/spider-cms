@@ -5,19 +5,11 @@
     </CustomHeadings>
     <div class="table-base-style" :class="tableClass">
       <q-table
+        v-bind="tableProps"
         :rows="extendedRows"
         :columns="columns"
-        row-key="name"
-        dense
-        flat
-        separator="none"
-        :hide-pagination="true"
-        :rows-per-page-options="[0]"
         :loading="loading"
         :class="tableClass"
-        :no-data-label="
-          isError ? 'Failed to load data. Please try again.' : 'No match information available'
-        "
       >
         <template v-slot:body-cell-name="props">
           <q-td :props="props" :class="nameCell(props.row)">
@@ -29,14 +21,14 @@
             <CommonButton
               class="q-mr-sm"
               :label="props.row?.cards?.yellow || '&nbsp;'"
-              arias="Add yellow card"
+              :arias="$t('buttons.addYellowCard')"
               variant="card"
               customClass="bg-main-yellow"
               @click="addCard(props.row, 'yellow')"
             />
             <CommonButton
               :label="props.row?.cards?.red || '&nbsp;'"
-              arias="Add red card"
+              :arias="$t('buttons.addRedCard')"
               variant="card"
               customClass="bg-main-red"
               @click="addCard(props.row, 'red')"
@@ -49,29 +41,30 @@
         <template v-slot:no-data>
           <div v-if="isError" class="full-width flex flex-center text-negative">
             <q-icon name="error_outline" size="24px" class="q-mr-sm" />
-            <span>Failed to load data. Please try again.</span>
+            <span>{{ $t('match.error') }}</span>
           </div>
         </template>
       </q-table>
     </div>
     <div class="flex justify-between cards-text-container text-bold">
-      <CustomLabels tag="p">
-        {{ sumTotalCards?.yellow }}
-        <span class="main-yellow text-uppercase">yellow</span> cards
-      </CustomLabels>
-      <CustomLabels tag="p">
-        {{ sumTotalCards?.red }}
-        <span class="main-red text-uppercase">red</span> cards
-      </CustomLabels>
+      <CustomLabels tag="p">{{
+        $t('match.cards.yellow', { count: sumTotalCards?.yellow })
+      }}</CustomLabels>
+      <CustomLabels tag="p">{{
+        $t('match.cards.red', { count: sumTotalCards?.red })
+      }}</CustomLabels>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import CommonButton from 'src/components/CommonButton.vue'
-import CustomHeadings from 'src/components/CustomHeadings.vue'
-import CustomLabels from 'src/components/CustomLabels.vue'
+import { useI18n } from 'vue-i18n'
+import CommonButton from '@/components/CommonButton.vue'
+import CustomHeadings from '@/components/CustomHeadings.vue'
+import CustomLabels from '@/components/CustomLabels.vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   team: {
@@ -94,22 +87,50 @@ const props = defineProps({
   },
 })
 
+const tableProps = {
+  rowKey: 'name',
+  dense: true,
+  flat: true,
+  separator: 'none',
+  hidePagination: true,
+  rowsPerPageOptions: [0],
+  noDataLabel: props.isError ? t('match.error') : t('match.noData'),
+}
+
 const columns = [
   {
     name: 'number',
     required: true,
-    label: 'No',
+    label: t('table.columns.number'),
     align: 'left',
     field: (row) => row.s_n,
   },
-  { name: 'name', align: 'left', label: 'Name', field: 'name' },
+  {
+    name: 'name',
+    align: 'left',
+    label: t('table.columns.name'),
+    field: 'name',
+  },
   {
     name: 'position',
     align: 'left',
-    label: 'Position',
-    field: (row) => getPositionLabel(row?.position),
+    label: t('table.columns.position'),
+    field: (row) => {
+      const positions = {
+        G: t('table.positions.G'),
+        D: t('table.positions.D'),
+        M: t('table.positions.M'),
+        A: t('table.positions.A'),
+      }
+      return positions[row?.position] || '-'
+    },
   },
-  { name: 'actions', align: 'center', label: 'Cards', field: 'actions' },
+  {
+    name: 'actions',
+    align: 'center',
+    label: t('table.columns.cards'),
+    field: 'actions',
+  },
 ]
 
 // Highlights player's name text based on the card received
@@ -128,21 +149,9 @@ const addCard = (row, card) => {
   if (cards.yellow > 1) cards.red = 1
 }
 
-const getPositionLabel = (position) => {
-  const positionMap = {
-    G: 'Goalkeeper',
-    D: 'Defender',
-    M: 'Midfielder',
-    A: 'Attacker',
-  }
-
-  return positionMap[position] || '-'
-}
-
 const teamName = computed(() => {
-  return props.isAwayTeam
-    ? `away team ` + props.team?.name || 'TBA'
-    : `home team ` + props.team?.name || 'TBA'
+  const teamType = props.isAwayTeam ? 'awayTeam' : 'homeTeam'
+  return t(`match.${teamType}`, { name: props.team?.name || t('common.tba') })
 })
 
 // Extends the team data object to include number of Y/R cards

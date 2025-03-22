@@ -1,78 +1,100 @@
 <template>
   <button
-    :type
+    :type="type"
     :disabled="disabled || loading"
     :class="['custom-btn', variant, size, customCardClass, { disabled, loading }]"
-    :aria-label="arias"
+    :aria-label="ariaLabel"
   >
-    <div v-if="!loading">
-      <template v-if="$slots.prependIcon">
-        <slot name="prependIcon">
-          <!-- Place for Icon BEFORE content -->
-        </slot>
-      </template>
-      <slot name="content"> {{ label }} </slot>
-      <template v-if="$slots.appendIcon">
-        <slot name="appendIcon">
-          <!-- Place for Icon AFTER content -->
-        </slot>
-      </template>
+    <div v-if="!loading" class="button-content">
+      <slot name="prependIcon" />
+      <slot name="content">{{ label }}</slot>
+      <slot name="appendIcon" />
     </div>
-    <span v-else class="loader"></span>
+    <span v-else class="loader" :aria-label="$t('common.loading')" aria-hidden="true" />
   </button>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 /**
- * @prop {String} label - Text inside the button
- * @prop {String} [arias="does x"] - Improves accessibility
- * @prop {'button' | 'submit' | 'reset'} [type='button'] - Type of the button
- * @prop {'primary' | 'secondary' | 'card'} [variant='primary'] - Defines button style
- * @prop {'small' | 'medium' | 'large'} [size='medium'] - Button size
- * @prop {Boolean} [disabled=false] - Disables the button
- * @prop {Boolean} [loading=false] - Shows a loading state
- * @prop {String} [customClass] - Custom styling override
+ * CommonButton Component
+ *
+ * A reusable button component with various styles, sizes, and states.
+ * Supports icons, loading state, and accessibility features.
+ *
+ * @example
+ * ```vue
+ * <CommonButton
+ *   label="Click me"
+ *   variant="primary"
+ *   size="medium"
+ *   :loading="isLoading"
+ *   @click="handleClick"
+ * >
+ *   <template #prependIcon>
+ *     <q-icon name="add" />
+ *   </template>
+ * </CommonButton>
+ * ```
  */
 const props = defineProps({
+  /** Text content of the button */
   label: {
     type: [String, Number],
     default: '',
   },
+  /** Accessibility label for screen readers */
   arias: {
     type: String,
     default: '',
   },
+  /** HTML button type */
   type: {
     type: String,
     default: 'button',
+    validator: (value) => ['button', 'submit', 'reset'].includes(value),
   },
+  /** Visual style variant */
   variant: {
     type: String,
     default: 'primary',
+    validator: (value) => ['primary', 'secondary', 'card'].includes(value),
   },
+  /** Size variant */
   size: {
     type: String,
     default: 'medium',
+    validator: (value) => ['small', 'medium', 'large'].includes(value),
   },
+  /** Custom CSS class to override default styles */
   customClass: {
     type: String,
     default: '',
   },
+  /** Disabled state */
   disabled: {
     type: Boolean,
     default: false,
   },
+  /** Loading state */
   loading: {
     type: Boolean,
     default: false,
   },
 })
 
-const customCardClass = computed(() => {
-  if (props.customClass) return props.customClass
-  return props.variant === 'card' ? 'card' : ''
+const customCardClass = computed(
+  () => props.customClass || (props.variant === 'card' ? 'card' : ''),
+)
+
+const ariaLabel = computed(() => {
+  if (props.loading) return t('common.loading')
+  if (props.disabled) return t('common.error')
+  return props.arias || props.label
 })
 </script>
 
@@ -107,35 +129,40 @@ const customCardClass = computed(() => {
   }
 }
 
-/* Primary Variant */
-.custom-btn.primary {
+.button-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Variants */
+.primary {
   background: #007bff;
   color: white;
 }
 
-/* Secondary Variant */
-.custom-btn.secondary {
+.secondary {
   background: #6c757d;
   color: white;
 }
 
 /* Sizes */
-.custom-btn.small {
+.small {
   font-size: 12px;
   padding: 6px 12px;
 }
 
-.custom-btn.medium {
+.medium {
   font-size: 14px;
   padding: 10px 16px;
 }
 
-.custom-btn.large {
+.large {
   font-size: 16px;
   padding: 14px 20px;
 }
 
-/* Card Styles */
+/* Card Style */
 .card {
   width: 32px;
   height: 24px;
